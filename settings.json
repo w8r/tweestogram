@@ -1,5 +1,5 @@
 {
-    "dataUrl": "/data/data.csv",
+    "dataUrl": "/data/data.js",
     "histogramBg": "rgba(20,20,20,0.8)",
     "outskirtsColor": "#00a0ff",
     "centerColor": "#d4a02b",
