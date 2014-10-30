@@ -43,7 +43,7 @@ function App(options) {
 App.prototype.getData = function(url, callback) {
     reqwest({
         url: url,
-        contentType: 'text/csv',
+        //contentType: 'text/csv',
         success: callback
     });
 };
@@ -56,32 +56,6 @@ App.prototype.onDataReceived = function(data) {
 
     this._timeControl = new TimeControl(this._data, this.options)
         .addTo(this._map);
-
-    this._map.fireEvent('data', this.mapData());
-};
-
-App.prototype.mapData = function() {
-
-};
-
-/**
- * Populates histogram data
- * @return {Array.<Object>}
- */
-App.prototype.histogram = function() {
-    var center = [],
-        outskirts = [];
-    for (var i = 0, len = this._data.data.length; i < len; i++) {
-        center.push({
-            value: this._data.data[i].center,
-            date: this._data.data[i].date
-        });
-        outskirts.push({
-            value: -this._data.data[i].outskirts,
-            date: this._data.data[i].date
-        });
-    }
-    return [center, outskirts];
 };
 
 /**

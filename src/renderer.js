@@ -42,6 +42,11 @@ Renderer.prototype.update = function() {
     return this;
 };
 
+/**
+ * Pre-renders points, separate calculations and rendering
+ * @param  {Object} p
+ * @return {Object}
+ */
 Renderer.prototype.prerender = function(p) {
     var outskirtsColor = this.options.outskirtsColor,
         centerColor = this.options.centerColor,
