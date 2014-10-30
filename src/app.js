@@ -2,6 +2,7 @@
 
 var reqwest = require('reqwest');
 var TimeControl = require('./timecontrol');
+var Map = require('./map');
 
 /**
  * @param {Object} options
@@ -9,6 +10,9 @@ var TimeControl = require('./timecontrol');
  */
 function App(options) {
 
+    /**
+     * @type {Object}
+     */
     this.options = options;
 
     /**
@@ -20,6 +24,14 @@ function App(options) {
      * @type {Histogram}
      */
     this._histogram = null;
+
+    /**
+     * @type {Map}
+     */
+    this._map = new Map('map', {
+        mapboxId: options.mapboxId,
+        mapboxKey: options.mapboxKey
+    }).setView(options.center, options.zoom);
 
     this.getData(options.dataUrl, this.onDataReceived.bind(this));
 };
@@ -42,16 +54,14 @@ App.prototype.getData = function(url, callback) {
 App.prototype.onDataReceived = function(data) {
     this._data = this.parse(data);
 
-    this._timeControl = new TimeControl(this.histogram(),
-        this._data.center, this._data.outskirts, {
-            bg: this.options.histogramBg,
-            colors: [this.options.centerColor, this.options.outskirtsColor],
-            axis: {
-                color: 'rgba(0,0,0,0.8)',
-                weight: 1,
-                opacity: 0.8
-            }
-        });
+    this._timeControl = new TimeControl(this._data, this.options)
+        .addTo(this._map);
+
+    this._map.fireEvent('data', this.mapData());
+};
+
+App.prototype.mapData = function() {
+
 };
 
 /**
@@ -93,55 +103,20 @@ App.prototype.parse = function(csv) {
     csv = ('\n' + csv.slice(1, csv.length).join('\n'))
         .split(/\n(:?\d{2}.\d{2}.\d{4}\;)/g);
 
-
-    for (var i = 2, ii = csv.length - 1; i < ii; i += 2) {
+    for (var i = 2, ii = csv.length; i < ii; i += 2) {
         row = {};
-        rowStr = (csv[i - 1] + csv[i]).split(';');
+        rowStr = (csv[i - 1] + csv[i]).split(/\;/g);
 
         for (var j = 0, jj = rowStr.length; j < jj; j++) {
+            if (/^(lat|long)/.test(headers[j])) {
+                rowStr[j] = parseFloat(rowStr[j].replace(',', '.'));
+            }
             row[headers[j]] = rowStr[j];
         }
-
-        if (row.center === '1') {
-            center++;
-        } else {
-            outskirts++;
-        }
-
-        if (date !== row.date) {
-            if (dayData) {
-                data.push({
-
-                    center: center,
-                    outskirts: outskirts,
-
-                    date: date,
-                    data: dayData
-                });
-
-                maxCenter = Math.max(center, maxCenter);
-                maxOutskirts = Math.max(outskirts, maxOutskirts);
-
-                center = 0;
-                outskirts = 0;
-
-            }
-            date = row.date;
-            dayData = [];
-        }
-        dayData.push(row);
+        data.push(row);
     }
 
-    return {
-
-        center: maxCenter,
-        outskirts: maxOutskirts,
-
-        dateStart: data[0].date,
-        dateEnd: data[data.length - 1].date,
-
-        data: data
-    };
+    return data
 };
 
 module.exports = App;

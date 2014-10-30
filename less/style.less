@@ -1,15 +1,45 @@
 body, html {
     margin: 0;
     padding: 0;
+    width: 100%;
+    height: 100%;
+}
+
+#map {
+    display: block;
+    width: 100%;
+    height: 100%;
+
+    .cluster {
+        background: #f00;
+        border-radius: 50%;
+    }
+
+    .marker-center,
+    .marker-outskirts, {
+        border-radius: 50%;
+    }
+
+    .marker-center {
+        background: #00a0ff;
+    }
+
+    .marker-outskirts {
+        background: #d4a02b;
+    }
 }
 
 #histogram {
-    width: 300px;
-    height: 150px;
     display: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+
+    -o-user-select: none;
+    user-select: none;
 
     .background {
-        fill: rgba(20,20,20,0.6);
+        fill: rgba(120,120,120,0.8);
     }
 
     .graph-back {
@@ -23,6 +53,12 @@ body, html {
     .graph-total {
         font-family: Helvetica, Tahoma, sans-serif;
         font-size: 22px;
+        text-anchor: middle;
+        pointer-events: none;
+    }
+
+    .graph-total-sum {
+        font-size: 28px;
     }
 
     .handle {
@@ -30,14 +66,18 @@ body, html {
         stroke-width: 8;
         stroke: #ff0000;
         stroke-opacity: 0;
+        cursor: pointer;
+    }
+
+    &.dragging, &.dragging .handle {
+        cursor: -webkit-grabbing;
+        cursor: -moz-grabbing;
     }
 }
 
 .timecontrol {
     display: block;
-    position: absolute;
-    right: 20px;
-    top: 20px;
+    position: relative;
 
     #histogram {
         display: block;

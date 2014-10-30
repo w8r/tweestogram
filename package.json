@@ -25,6 +25,7 @@
   "dependencies": {
     "hammerjs": "^2.0.4",
     "leaflet": "^0.7.3",
+    "leaflet.markercluster": "^0.4.0",
     "position": "git://github.com/jkroso/position",
     "reqwest": "^1.1.4",
     "throttleit": "git://github.com/component/throttle"

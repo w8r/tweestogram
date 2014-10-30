@@ -1,9 +1,12 @@
+"use strict";
+
 var xmlns = "http://www.w3.org/2000/svg";
 var throttle = require('throttleit');
 var min = Math.min,
     max = Math.max,
     abs = Math.abs,
-    round = Math.round;
+    round = Math.round,
+    floor = Math.floor;
 
 
 /**
@@ -16,6 +19,10 @@ var min = Math.min,
  */
 function Histogram(container, data, maxY, minY, options) {
 
+    /**
+     * Store the data
+     * @type {Array.<Object>}
+     */
     this.data = data;
 
     /**
@@ -34,9 +41,10 @@ function Histogram(container, data, maxY, minY, options) {
     this.w = this._container.getAttributeNS(null, 'width');
 
     /**
+     * Correct bottom space
      * @type {Number}
      */
-    this.h = this._container.getAttributeNS(null, 'height');
+    this.h = this._container.getAttributeNS(null, 'height') - 40;
 
     /**
      * @type {Number}
@@ -70,7 +78,7 @@ function Histogram(container, data, maxY, minY, options) {
         this._dy * Math.min(Math.abs(maxY), Math.abs(minY));
 
     this.render(data, options.colors, options.bg);
-    this.updateStats = throttle(this.updateStats.bind(this), 50);
+    this.updateStats = /*throttle(*/ this.updateStats.bind(this) /*, 5)*/ ;
     this.update();
 };
 
@@ -93,10 +101,19 @@ Histogram.prototype.render = function(data, colors, bg) {
         this.drawGraph(data[i], 0, colors[i]);
     }
 
+    this.drawTotal();
     this.drawAxis(this.options.axis);
-    // var element = this.createText('graph-total-sum', this.w / 2, m);
-    // this._container.insertBefore(element, this._controls);
-    // this.totals.push(element);
+};
+
+/**
+ * [drawTotal description]
+ * @return {[type]} [description]
+ */
+Histogram.prototype.drawTotal = function() {
+    var element = this.createText('graph-total graph-total-sum',
+        this.w / 2, this.h + this.padding * 2.5, 'baseline');
+    this._container.insertBefore(element, this._controls);
+    this.totals.push(element);
 };
 
 /**
@@ -143,10 +160,7 @@ Histogram.prototype.drawGraph = function(data, smooth, color) {
     }
     path.push("L", [x, h].join(','), "Z");
 
-    console.log(data[m].value, this._axis - (data[m].value / 2) * this._dy, this._axis)
     m = this._axis - (data[m].value / 2) * this._dy;
-    console.log(m);
-
 
     element.setAttributeNS(null, 'd', path.join(''));
     element.setAttributeNS(null, 'stroke', color);
@@ -170,16 +184,20 @@ Histogram.prototype.drawGraph = function(data, smooth, color) {
 
 /**
  * Creates text on graph
- * @param  {String} className
- * @param  {Number} x
- * @param  {Number} y
+ *
+ * @param  {String}  className
+ * @param  {Number}  x
+ * @param  {Number}  y
+ * @param  {String=} textAnchor
+ * @param  {String=} align
+ *
  * @return {SVGTextElement}
  */
-Histogram.prototype.createText = function(className, x, y) {
+Histogram.prototype.createText = function(className, x, y, align) {
     var element = document.createElementNS(xmlns, 'text');
-    element.setAttributeNS(null, 'class', 'graph-total');
-    element.setAttributeNS(null, 'text-anchor', 'middle');
-    element.setAttributeNS(null, 'alignment-baseline', 'central');
+
+    element.setAttributeNS(null, 'class', className);
+    element.setAttributeNS(null, 'dominant-baseline', align || 'central');
     element.setAttributeNS(null, 'x', x);
     element.setAttributeNS(null, 'y', y);
     return element;
@@ -220,27 +238,64 @@ Histogram.prototype.update = function() {
  * Updates numbers
  */
 Histogram.prototype.updateStats = function() {
-    var start = round((this.left - this.padding) / this._dx),
-        end = round((this.right - this.padding) / this._dx),
+    var start = this.getStart(),
+        end = this.getEnd(),
         data = this.data,
         x = (this.left + this.right) / 2,
         scale = abs(this.left - this.right) / (this.w - this.padding * 2),
         total = 0,
-        text;
+        sums = [],
+        text, i, len = data.length;
 
-    for (var i = 0; i < data.length; i++) {
+    for (i = 0; i < len; i++) {
         for (var j = start, sum = 0, row = this.data[i]; j < end; j++) {
             sum += row[j].value;
         }
         sum = abs(sum);
-        total += abs;
-
-        text = this.totals[i];
-        text.innerHTML = sum;
-        text.setAttributeNS(null, 'x', x);
-        text.style.zoom = max(0.5, scale);
-        //text.setAttributeNS(null, 'transform', 'scale(' + scale + ')');
+        sums.push(sum);
+        total += sum;
     }
+    sums.push(total);
+
+    // separate render and calc
+    for (i = 0; i < len + 1; i++) {
+        text = this.totals[i];
+        text.innerHTML = sums[i];
+        text.setAttributeNS(null, 'x', x);
+
+        text.style.zoom = 0.6 + 0.4 * scale;
+        //}
+    }
+};
+
+/**
+ * Start date pos in set
+ * @return {Number}
+ */
+Histogram.prototype.getStart = function() {
+    return floor((this.left - this.padding) / this._dx);
+};
+
+/**
+ * End date position
+ * @return {Number}
+ */
+Histogram.prototype.getEnd = function() {
+    return floor((this.right - this.padding) / this._dx);
+};
+
+/**
+ * @return {String}
+ */
+Histogram.prototype.getStartDate = function() {
+    return this.data[0][this.getStart()].date;
+};
+
+/**
+ * @return {String}
+ */
+Histogram.prototype.getEndDate = function() {
+    return this.data[0][this.getEnd() - 1].date;
 };
 
 /**
