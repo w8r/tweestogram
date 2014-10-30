@@ -1,15 +1,28 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <title>Tweet histogram</title>
         <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7/leaflet.css" />
         <!-- <link href="https://api.tiles.mapbox.com/mapbox.js/v1.6.4/mapbox.css" rel="stylesheet" /> -->
         <!-- <link href="node_modules/mapbox.js/theme/style.css" rel="stylesheet" /> -->
         <link type="text/css" href="static/style.css" rel="stylesheet">
-        <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     </head>
     <body>
-        <svg id="histogram" width="300" height="150" viewPort="0 0 300 150"></svg>
+
+        <svg id="histogram" width="300" height="150" viewPort="0 0 300 150">
+            <path d="M0,0L300,0L300,150L0,150Z" class="background"></path>
+            <defs>
+                <clipPath id="current">
+                    <path id="clip" d="M10,10L290,10L290,140L10,140Z"></path>
+                </clipPath>
+            </defs>
+            <g class="controls">
+                <path d="M0,0L10,0L10,150L0,150L9,140L9,10Z" class="handle"></path>
+                <path d="M300,0L290,0L290,150L300,150L291,140L291,10Z" class="handle"></path>
+            </g>
+        </svg>
+
         <script type="text/javascript" src="static/app.js"></script>
     </body>
 </html>

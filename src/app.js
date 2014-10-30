@@ -1,5 +1,7 @@
+"use strict";
+
 var reqwest = require('reqwest');
-var Histogram = require('./histogram');
+var TimeControl = require('./timecontrol');
 
 /**
  * @param {Object} options
@@ -40,13 +42,14 @@ App.prototype.getData = function(url, callback) {
 App.prototype.onDataReceived = function(data) {
     this._data = this.parse(data);
 
-    this._histogram = new Histogram(this.histogram(),
+    this._timeControl = new TimeControl(this.histogram(),
         this._data.center, this._data.outskirts, {
             bg: this.options.histogramBg,
             colors: [this.options.centerColor, this.options.outskirtsColor],
             axis: {
                 color: 'rgba(0,0,0,0.8)',
-                weight: 1
+                weight: 1,
+                opacity: 0.8
             }
         });
 };
@@ -80,14 +83,20 @@ App.prototype.parse = function(csv) {
 
     var headers = csv[0].split(';'),
         data = [],
-        center = outskirts =
-        maxCenter = maxOutskirts = 0,
+        center = 0,
+        outskirts = 0,
+        maxCenter = 0,
+        maxOutskirts = 0,
         dayData, date,
         rowStr, row;
 
-    for (var i = 1, ii = csv.length - 1; i < ii; i++) {
+    csv = ('\n' + csv.slice(1, csv.length).join('\n'))
+        .split(/\n(:?\d{2}.\d{2}.\d{4}\;)/g);
+
+
+    for (var i = 2, ii = csv.length - 1; i < ii; i += 2) {
         row = {};
-        rowStr = csv[i].split(';');
+        rowStr = (csv[i - 1] + csv[i]).split(';');
 
         for (var j = 0, jj = rowStr.length; j < jj; j++) {
             row[headers[j]] = rowStr[j];

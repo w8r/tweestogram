@@ -6,7 +6,33 @@ html {
 #histogram {
   width: 300px;
   height: 150px;
+  display: none;
+}
+#histogram .background {
+  fill: rgba(20, 20, 20, 0.6);
+}
+#histogram .graph-back {
+  fill-opacity: 0.4;
+}
+#histogram .graph-front {
+  fill-opacity: 0.8;
+}
+#histogram .graph-total {
+  font-family: Helvetica, Tahoma, sans-serif;
+  font-size: 22px;
+}
+#histogram .handle {
+  fill: rgba(0, 0, 0, 0.8);
+  stroke-width: 8;
+  stroke: #ff0000;
+  stroke-opacity: 0;
+}
+.timecontrol {
+  display: block;
   position: absolute;
   right: 20px;
   top: 20px;
+}
+.timecontrol #histogram {
+  display: block;
 }

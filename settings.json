@@ -1,7 +1,7 @@
 {
     "dataUrl": "/data/data.csv",
     "histogramBg": "rgba(20,20,20,0.8)",
-    "outskirtsColor": "#d4a02b",
-    "centerColor": "#00a0ff",
+    "outskirtsColor": "#00a0ff",
+    "centerColor": "#d4a02b",
     "opacity": 0.7
 }
