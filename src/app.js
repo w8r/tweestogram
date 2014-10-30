@@ -1,6 +1,6 @@
 "use strict";
 
-var reqwest = require('reqwest');
+var reqwest = global.reqwest = require('reqwest');
 var TimeControl = require('./timecontrol');
 var Map = require('./map');
 
