@@ -46,7 +46,9 @@ App.prototype.getData = function(url, callback) {
         crossOrigin: true,
         withCredentials: true,
         //contentType: 'text/csv',
-        success: callback
+        success: function(xhr) {
+            callback(xhr.response);
+        }
     });
 };
 
