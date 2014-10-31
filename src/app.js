@@ -51,6 +51,7 @@ App.prototype.getData = function(url, callback) {
             if (typeof response !== 'string') {
                 response = response.response;
             }
+            callback(response);
         }
     });
 };
