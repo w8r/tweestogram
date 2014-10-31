@@ -46,7 +46,13 @@ App.prototype.getData = function(url, callback) {
         crossOrigin: true,
         withCredentials: true,
         //contentType: 'text/csv',
-        success: callback
+        success: function(response) {
+            // weird s3/localhost interchangability
+            if (typeof response !== 'string') {
+                response = response.response;
+            }
+            callback(response);
+        }
     });
 };
 
