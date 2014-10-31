@@ -43,6 +43,8 @@ function App(options) {
 App.prototype.getData = function(url, callback) {
     reqwest({
         url: url,
+        crossOrigin: true,
+        withCredentials: true,
         //contentType: 'text/csv',
         success: callback
     });
