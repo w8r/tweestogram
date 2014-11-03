@@ -81,23 +81,38 @@ TimeControl.prototype.onAdd = function(map) {
             }
         });
 
+    var point;
     for (var i = 0, len = this._data.length; i < len; i++) {
-        this._data[i].latlng = new L.LatLng(this._data[i].lat, this._data[i].long);
-        this._data[i].radius = this._data[i].opacity = 0;
+        point = this._data[i];
+        point.latlng = new L.LatLng(point.lat, point.long);
+        point.radius = point.opacity = 0;
     }
 
-    this._layer = new DynamicLayer(this._data, new Renderer({
+    this._renderer = new Renderer({
         centerColor: this.options.centerColor,
         outskirtsColor: this.options.outskirtsColor,
-        opacity: 0.8,
+        opacity: 0.7,
         dOpacity: 1 / (1 * 60),
         dR: 10 / (0.5 * 60),
         radius: 10
-    })).addTo(map);
+    });
 
+    this._layer = new DynamicLayer(this._data, this._renderer).addTo(map);
     this.onRangeSelected(this.histogram.getStartDate(), this.histogram.getEndDate());
 
+    map.on('zoomend', this.onZoomend, this);
+
     return this._container;
+};
+
+/**
+ * TODO zoom animation
+ */
+TimeControl.prototype.onZoomend = function() {
+    // var zoom = this._map.getZoom();
+    // //this._renderer.options.radius = zoom * 2;
+    // console.log(zoom)
+    // this._layer.redraw();
 };
 
 /**
@@ -288,27 +303,49 @@ TimeControl.prototype.flattenData = function(start, end) {
 TimeControl.prototype.onRangeSelected = function(start, end) {
     var marker = start,
         active = false,
-        o;
-    // var h = 0;
-    for (var i = 0, len = this._data.length; i < len; i++) {
-        o = this._data[i];
-        if (o.date === marker) {
-            if (marker === start) { // start - make visible
-                active = !active;
-                marker = end; // wait for end
-            } else if (marker === end) { // end
-                marker = -1; // wait for next not end
+        data = this._data,
+        o, i, len;
+
+    if (start === end) {
+        for (i = 0, len = this._data.length; i < len; i++) {
+            data.active = false;
+        }
+    } else {
+        // var h = 0;
+        for (i = 0, len = this._data.length; i < len; i++) {
+            o = data[i];
+            if (o.date === marker) {
+                if (marker === start) { // start - make visible
+                    active = !active;
+                    marker = end; // wait for end
+                } else if (marker === end) { // end
+                    marker = -1; // wait for next not end
+                }
             }
+            if (marker === -1 && o.date !== end) {
+                marker = -2;
+                active = !active;
+            }
+            // if (active) h++;
+            o.active = active;
         }
-        if (marker === -1 && o.date !== end) {
-            marker = -2;
-            active = !active;
-        }
-        // if (active) h++;
-        o.active = active;
     }
+
     // console.log(h, '/', this._data.length);
     this._layer.redraw();
+
+};
+
+/**
+ * @param  {Map} map
+ * @return {TimeControl}
+ */
+TimeControl.prototype.onRemove = function(map) {
+    map.removeLayer(this._layer);
+    this._layer = null;
+    this._renderer = null;
+    map.off('zoomend', this.onZoomend, this);
+    return this;
 };
 
 module.exports = TimeControl;

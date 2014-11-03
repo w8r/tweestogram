@@ -5,6 +5,8 @@ body, html {
     height: 100%;
 }
 
+@import (inline) "../node_modules/leaflet/dist/leaflet.css";
+
 #map {
     display: block;
     width: 100%;
@@ -43,18 +45,36 @@ body, html {
     }
 
     .graph-back {
-        fill-opacity: 0.4;
+        fill-opacity: 0.3;
     }
 
     .graph-front {
         fill-opacity: 0.8;
     }
 
+    .graph-total,
+    .date {
+        font-family: "Trebuchet MS", Helvetica, Tahoma, sans-serif;
+    }
+
     .graph-total {
-        font-family: Helvetica, Tahoma, sans-serif;
-        font-size: 22px;
+        font-size: 24px;
         text-anchor: middle;
         pointer-events: none;
+    }
+
+    .date {
+        font-size: 12px;
+        color: rgba(0,0,0,0.7);
+
+        &.left {
+            text-anchor: start;
+            padding-right: 5px;
+        }
+        &.right {
+            text-anchor: end;
+            padding-left: 5px;
+        }
     }
 
     .graph-total-sum {

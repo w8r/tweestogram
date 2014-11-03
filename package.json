@@ -1,33 +1,33 @@
 {
-  "name": "tweethistorgam",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "watch-css": "catw -c 'lessc -' 'less/*.less' -o static/style.css -v",
-    "watch-js": "watchify index.js -o static/app.js -dv",
-    "watch": "npm run watch-css & npm run watch-js",
-    "build-css": "catw -c 'lessc -' 'less/*.less' > static/style.css",
-    "build-js": "browserify index.js > static/app.js",
-    "build": "npm run build-css && npm run build-js",
-    "start": "npm run watch & serve"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/w8r/tweethistorgam.git"
-  },
-  "author": "",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/w8r/tweethistorgam/issues"
-  },
-  "homepage": "https://github.com/w8r/tweethistorgam",
-  "dependencies": {
-    "hammerjs": "^2.0.4",
-    "leaflet": "^0.7.3",
-    "leaflet.markercluster": "^0.4.0",
-    "position": "git://github.com/jkroso/position",
-    "reqwest": "^1.1.4",
-    "throttleit": "git://github.com/component/throttle"
-  }
+    "name": "tweethistorgam",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "watch-css": "catw -c 'lessc -' 'less/*.less' -o static/style.css -v",
+        "watch-js": "watchify index.js -o static/app.js -dv",
+        "watch": "npm run watch-css & npm run watch-js",
+        "build-css": "lessc less/*.less > static/style.css",
+        "build-js": "browserify index.js > static/app.js",
+        "build": "npm run build-css && npm run build-js",
+        "start": "npm run watch & serve"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/w8r/tweethistorgam.git"
+    },
+    "author": "",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/w8r/tweethistorgam/issues"
+    },
+    "homepage": "https://github.com/w8r/tweethistorgam",
+    "dependencies": {
+        "hammerjs": "^2.0.4",
+        "leaflet": "^0.7.3",
+        "leaflet.markercluster": "^0.4.0",
+        "position": "git://github.com/jkroso/position",
+        "reqwest": "^1.1.4",
+        "throttleit": "git://github.com/component/throttle"
+    }
 }
