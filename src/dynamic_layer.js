@@ -7,7 +7,6 @@ L.DynamicLayer = L.Class.extend({
     // options: {
     //     maxZoom: 18,
     //     radius: 25,
-    //     blur: 15,
     //     max: 1.0
     // },
 
@@ -58,6 +57,7 @@ L.DynamicLayer = L.Class.extend({
         map._panes.overlayPane.appendChild(this._canvas);
 
         map.on('moveend', this._reset, this);
+        map.on('zoomstart', this._stopRendering, this);
 
         if (map.options.zoomAnimation && L.Browser.any3d) {
             map.on('zoomanim', this._animateZoom, this);
@@ -68,8 +68,10 @@ L.DynamicLayer = L.Class.extend({
 
     onRemove: function(map) {
         map.getPanes().overlayPane.removeChild(this._canvas);
+        this._stopRendering();
 
         map.off('moveend', this._reset, this);
+        map.off('zoomstart', this._stopRendering, this);
 
         if (map.options.zoomAnimation) {
             map.off('zoomanim', this._animateZoom, this);
@@ -99,6 +101,7 @@ L.DynamicLayer = L.Class.extend({
 
     _updateOptions: function() {
         // animation here
+        this._reset();
     },
 
     _reset: function() {
@@ -117,27 +120,45 @@ L.DynamicLayer = L.Class.extend({
     },
 
     _redraw: function() {
-        var i, len, data = [],
+        var i, len, point, data = [],
             r = 20,
             moved = this._moved,
             size = this._map.getSize(),
             bounds = new L.LatLngBounds(
                 this._map.containerPointToLatLng(L.point([-r, -r])),
-                this._map.containerPointToLatLng(size.add([r, r])));
+                this._map.containerPointToLatLng(size.add([r, r]))),
+            pointsToRender = 0;
 
         for (i = 0, len = this._data.length; i < len; i++) {
-            if (bounds.contains(this._data[i].latlng)) {
-                if (moved) {
-                    this._data[i].px =
-                        this._map.latLngToContainerPoint(this._data[i].latlng);
+            point = this._data[i];
+            if (bounds.contains(point.latlng)) {
+                if (!('px' in point) || moved) {
+                    point.px = this._map.latLngToContainerPoint(point.latlng);
                 }
-                data.push(this._renderer.prerender(this._data[i]));
+
+                if (!this._renderer.pointIsRendered(point)) {
+                    point = this._renderer.prerender(point);
+                    pointsToRender++;
+                    data.push(point);
+                } else if (point.active) {
+                    data.push(point);
+                }
+
+            } else {
+                point.opacity = point.radius = 0;
             }
         }
         this._renderer.draw(data);
         this._frame = this._moved = null;
-        //console.log(data)
-        this.redraw();
+
+        if (pointsToRender) {
+            this.redraw();
+        }
+    },
+
+    _stopRendering: function() {
+        L.Util.cancelAnimFrame(this._frame);
+        this._frame = null;
     },
 
     _animateZoom: function(e) {
@@ -148,7 +169,6 @@ L.DynamicLayer = L.Class.extend({
 
         this._canvas.style[L.DomUtil.TRANSFORM] =
             L.DomUtil.getTranslateString(offset) + ' scale(' + scale + ')';
-        // L.DomUtil.setTransform(this._canvas, offset, scale);
     }
 });
 

@@ -36,16 +36,31 @@ html {
   fill: rgba(120, 120, 120, 0.8);
 }
 #histogram .graph-back {
-  fill-opacity: 0.4;
+  fill-opacity: 0.3;
 }
 #histogram .graph-front {
   fill-opacity: 0.8;
 }
+#histogram .graph-total,
+#histogram .date {
+  font-family: "Trebuchet MS", Helvetica, Tahoma, sans-serif;
+}
 #histogram .graph-total {
-  font-family: Helvetica, Tahoma, sans-serif;
-  font-size: 22px;
+  font-size: 24px;
   text-anchor: middle;
   pointer-events: none;
+}
+#histogram .date {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.7);
+}
+#histogram .date.left {
+  text-anchor: start;
+  padding-right: 5px;
+}
+#histogram .date.right {
+  text-anchor: end;
+  padding-left: 5px;
 }
 #histogram .graph-total-sum {
   font-size: 28px;

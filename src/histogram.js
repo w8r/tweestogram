@@ -8,6 +8,18 @@ var min = Math.min,
     round = Math.round,
     floor = Math.floor;
 
+var MONTHS = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
+
+/**
+ * DD.MM.YYYY -> MM YY
+ * @param  {String} date
+ * @return {String}
+ */
+function formatDate(date) {
+    return date.replace(/(\d{2})\.(\d{2})\.(\d{4})$/g, function(date, d, m, y) {
+        return '&nbsp;' + d + ' ' + MONTHS[parseInt(m)] + '&nbsp;';
+    });
+}
 
 /**
  * Histogram
@@ -38,13 +50,13 @@ function Histogram(container, data, maxY, minY, options) {
     /**
      * @type {Number}
      */
-    this.w = this._container.getAttributeNS(null, 'width');
+    this.w = parseInt(this._container.getAttributeNS(null, 'width'));
 
     /**
      * Correct bottom space
      * @type {Number}
      */
-    this.h = this._container.getAttributeNS(null, 'height') - 40;
+    this.h = parseInt(this._container.getAttributeNS(null, 'height') - 40);
 
     /**
      * @type {Number}
@@ -102,12 +114,27 @@ Histogram.prototype.render = function(data, colors, bg) {
     }
 
     this.drawTotal();
+    this.drawDates(this.getStartDate(), this.getEndDate());
     this.drawAxis(this.options.axis);
 };
 
 /**
- * [drawTotal description]
- * @return {[type]} [description]
+ * Date text markers
+ * @param  {String} startDate
+ * @param  {String} endDate
+ */
+Histogram.prototype.drawDates = function(startDate, endDate) {
+    this.startText = this.createText('date left', this.left,
+        this.h, undefined, formatDate(startDate));
+    this._container.insertBefore(this.startText, this._controls);
+
+    this.endText = this.createText('date right', this.right,
+        this.h, undefined, formatDate(endDate));
+    this._container.insertBefore(this.endText, this._controls);
+};
+
+/**
+ * Total number
  */
 Histogram.prototype.drawTotal = function() {
     var element = this.createText('graph-total graph-total-sum',
@@ -168,7 +195,6 @@ Histogram.prototype.drawGraph = function(data, smooth, color) {
     element.setAttributeNS(null, 'class', 'graph-back');
 
     this._container.insertBefore(element, this._controls);
-    console.log()
 
     // front copy
     element = element.cloneNode(element, true);
@@ -190,16 +216,22 @@ Histogram.prototype.drawGraph = function(data, smooth, color) {
  * @param  {Number}  y
  * @param  {String=} textAnchor
  * @param  {String=} align
+ * @param  {String=} text
  *
  * @return {SVGTextElement}
  */
-Histogram.prototype.createText = function(className, x, y, align) {
+Histogram.prototype.createText = function(className, x, y, align, text) {
     var element = document.createElementNS(xmlns, 'text');
 
     element.setAttributeNS(null, 'class', className);
     element.setAttributeNS(null, 'dominant-baseline', align || 'central');
     element.setAttributeNS(null, 'x', x);
     element.setAttributeNS(null, 'y', y);
+
+    if (text) {
+        element.innerHTML = text;
+    }
+
     return element;
 };
 
@@ -207,10 +239,23 @@ Histogram.prototype.createText = function(className, x, y, align) {
  * @param  {Number} pos
  */
 Histogram.prototype.moveLeftHandle = function(pos) {
-    var padding = this.padding;
-    this.left = max(padding, min(this.right, pos));
+    var w = this.w,
+        padding = this.padding,
+        textWidth = this.textWidth = this.textWidth || this.startText.offsetWidth,
+        pos;
+    this.left = max(padding, min(this.right - this._dx, pos));
+    pos = (this.left - padding);
     this.leftHandle.setAttributeNS(null, 'transform',
-        'translate(' + (this.left - padding) + ',0)');
+        'translate(' + pos + ',0)');
+
+    // move text
+    pos = pos - textWidth;
+    if (pos < 0) {
+        pos += textWidth;
+    }
+
+    this.startText.innerHTML = formatDate(this.getStartDate());
+    this.startText.setAttributeNS(null, 'transform', 'translate(' + pos + ',0)');
     this.update();
 };
 
@@ -219,10 +264,22 @@ Histogram.prototype.moveLeftHandle = function(pos) {
  */
 Histogram.prototype.moveRightHandle = function(pos) {
     var w = this.w,
-        padding = this.padding;
-    this.right = min(w - padding, max(pos, this.left));
+        padding = this.padding,
+        textWidth = this.textWidth = this.textWidth || this.startText.offsetWidth,
+        pos;
+    this.right = min(w - padding, max(pos, this.left + this._dx));
+    pos = (this.right - w + padding);
     this.rightHandle.setAttributeNS(null, 'transform',
-        'translate(' + (this.right - w + padding) + ',0)');
+        'translate(' + pos + ',0)');
+
+    pos += textWidth;
+    // move text
+    if ((w + pos) > (w)) {
+        pos -= textWidth;
+    }
+
+    this.endText.innerHTML = formatDate(this.getEndDate());
+    this.endText.setAttributeNS(null, 'transform', 'translate(' + pos + ',0)');
     this.update();
 };
 
@@ -248,7 +305,7 @@ Histogram.prototype.updateStats = function() {
         text, i, len = data.length;
 
     for (i = 0; i < len; i++) {
-        for (var j = start, sum = 0, row = this.data[i]; j < end; j++) {
+        for (var j = start, sum = 0, row = this.data[i]; j <= end; j++) {
             sum += row[j].value;
         }
         sum = abs(sum);
@@ -263,8 +320,7 @@ Histogram.prototype.updateStats = function() {
         text.innerHTML = sums[i];
         text.setAttributeNS(null, 'x', x);
 
-        text.style.zoom = 0.6 + 0.4 * scale;
-        //}
+        text.style.zoom = 0.55 + (0.45 * scale);
     }
 };
 
@@ -273,7 +329,7 @@ Histogram.prototype.updateStats = function() {
  * @return {Number}
  */
 Histogram.prototype.getStart = function() {
-    return floor((this.left - this.padding) / this._dx);
+    return max(0, floor((this.left - this.padding) / this._dx));
 };
 
 /**
@@ -281,7 +337,8 @@ Histogram.prototype.getStart = function() {
  * @return {Number}
  */
 Histogram.prototype.getEnd = function() {
-    return floor((this.right - this.padding) / this._dx);
+    return min(this.data[0].length - 1,
+        floor((this.right - this.padding) / this._dx));
 };
 
 /**
@@ -295,7 +352,7 @@ Histogram.prototype.getStartDate = function() {
  * @return {String}
  */
 Histogram.prototype.getEndDate = function() {
-    return this.data[0][this.getEnd() - 1].date;
+    return this.data[0][this.getEnd()].date;
 };
 
 /**

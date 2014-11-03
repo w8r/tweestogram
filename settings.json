@@ -1,11 +1,11 @@
 {
     "dataUrl": "/data/data.csv",
-    "histogramBg": "rgba(20,20,20,0.8)",
+    "histogramBg": "rgba(20,20,20,0.8)#c85221",
     "outskirtsColor": "#00a0ff",
-    "centerColor": "#d4a02b",
+    "centerColor": "#d4792b",
     "opacity": 0.7,
     "center": [55.7455891, 37.6193629],
     "zoom": 11,
     "mapboxKey": "pk.eyJ1IjoidzhyIiwiYSI6IlF2Nlh6QVkifQ.D7BkmeoMI7GEkMDtg3durw",
-    "mapboxId": "w8r.k0aohog3"
+    "mapboxId": "examples.map-20v6611k"
 }
