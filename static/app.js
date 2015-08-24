@@ -12467,7 +12467,7 @@ module.exports={
     "center": [55.7455891, 37.6193629],
     "zoom": 11,
     "mapboxKey": "pk.eyJ1IjoidzhyIiwiYSI6IlF2Nlh6QVkifQ.D7BkmeoMI7GEkMDtg3durw",
-    "mapboxId": "examples.map-20v6611k"
+    "mapboxId": "mapbox.emerald"
 }
 
 },{}],9:[function(require,module,exports){
